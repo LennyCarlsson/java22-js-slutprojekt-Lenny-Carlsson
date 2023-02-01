@@ -6,7 +6,6 @@ const imageSize = document.getElementById("image-size");
 const searchButton = document.getElementById("search-button");
 
 searchButton.addEventListener("click", function (event) {
-	console.log("In eventlistenern");
 	event.preventDefault();
 
 	if (searchField.value.trim() === "") {
@@ -33,9 +32,13 @@ searchButton.addEventListener("click", function (event) {
 	const url = flickrApiUrl + "?" + queryString;
 
 	fetch(url)
-		.then((response) => response.json())
+		.then((response) => {
+			if (response.status >= 200 && response.status < 300) {
+				return response.json();
+			}
+			throw new Error("An error occurred while fetching data");
+		})
 		.then((data) => {
-			console.log(data.photos);
 			if (!data.photos || data.photos.photo.length === 0) {
 				alert("No photos found. Please try a different search term.");
 				return;
@@ -50,10 +53,10 @@ searchButton.addEventListener("click", function (event) {
 		})
 
 		.catch((error) => {
-			imageContainer.innerHTML = "";
 			let errorImg = document.createElement("img");
 			errorImg.src = "./img/oops.jpg";
 			errorImg.alt = "An error occurred";
+			imageContainer.innerHTML = "";
 			imageContainer.appendChild(errorImg);
 		});
 });
